@@ -1,4 +1,5 @@
-Tests: build3
+Tests:
+ build3,
 Depends:
  build-essential,
  libglib2.0-dev,
@@ -7,7 +8,8 @@ Depends:
  python3-all-dev,
  python3-dbus,
 
-Tests: python3
+Tests:
+ python3,
 Depends:
  dbus-daemon,
  gnome-desktop-testing,

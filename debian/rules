@@ -4,8 +4,6 @@
 # Copyright © 2006 Sjoerd Simons <sjoerd@debian.org>
 # Copyright © 2012 Collabora Ltd.
 
-binaries := $(shell dh_listpackages)
-
 export DEB_BUILD_MAINT_OPTIONS = hardening=+bindnow
 export DEB_PYTHON_INSTALL_LAYOUT = deb
 export LANGUAGE=C.UTF-8
@@ -15,106 +13,71 @@ unexport LC_MESSAGES
 
 include /usr/share/dpkg/default.mk
 
-PYTHON3 := $(shell py3versions --requested --version debian/control)
-PYDEFAULTVER := $(shell py3versions --default --version)
-
-FLAVOURS := $(PYTHON3)
+built_binaries := $(shell dh_listpackages)
+default_python := $(shell py3versions --default)
+python_versions := $(shell py3versions --requested --version debian/control)
 
 %:
-	dh $@ $(DH_ADDONS) --buildsystem=meson
-build binary %-indep: DH_ADDONS=--with=sphinxdoc
+	dh $@ $(DH_ADDONS) --buildsystem=pybuild
 
-override_dh_autoreconf:
-	:
+common_build_args = \
+	-Csetup-args=-Dinstalled_tests=true \
+	-Csetup-args=-Dinstalled_tests_subdir={interpreter} \
+	$(NULL)
 
-override_dh_auto_configure-arch:
-	set -e; for x in $(FLAVOURS); do \
-		dh_auto_configure \
-			--builddirectory=build-$$x \
-			-- \
-			-Dpython=/usr/bin/python$$x \
-			-Ddoc=disabled \
-			-Dinstalled_tests=true \
-			-Dinstalled_tests_subdir=python$$x \
-			--libdir=/usr/lib \
-			; \
-	done
-override_dh_auto_configure-indep:
-	dh_auto_configure \
-		--builddirectory=build-indep \
-		-- \
-		-Dpython=/usr/bin/python3 \
-		--libdir=/usr/lib \
-		-Dinstalled_tests=false \
-		-Ddoc=enabled \
-		${NULL}
+ifneq ($(filter %-doc,$(built_binaries)),)
+enable_doc = enabled
+else
+enable_doc = disabled
+endif
 
-override_dh_auto_build-arch:
-	set -e; for x in $(FLAVOURS); do \
-		PYTHON=/usr/bin/python$$x \
-		dh_auto_build \
-			--arch \
-			--builddirectory=build-$$x \
-			-- \
-			$(NULL); \
-	done
-override_dh_auto_build-indep:
-	PYTHON=/usr/bin/python3 dh_auto_build --indep --builddirectory=build-indep
+override_dh_auto_build:
+	env \
+	PYBUILD_BUILD_ARGS="\
+		$(common_build_args) \
+		-Csetup-args=-Ddoc=disabled \
+	" \
+	PYBUILD_BUILD_ARGS_${default_python}="\
+		$(common_build_args) \
+		-Csetup-args=-Ddoc=$(enable_doc) \
+	" \
+	dh_auto_build
+
+export PYBUILD_TEST_ARGS = \
+	if ! env \
+		LC_ALL=C.UTF-8 \
+		MESON_TESTTHREADS=1 \
+		PYTHON={interpreter} \
+		VERBOSE=1 \
+	meson test \
+		-C {home_dir}/meson-build \
+		--verbose \
+	; then \
+		tail -v -n +0 meson-logs/testlog.txt; \
+		exit 1; \
+	fi
 
 override_dh_auto_test-arch:
-	set -e; for x in $(PYTHON3); do \
-		LC_ALL=C.UTF-8 \
-		PYTHON=/usr/bin/python$$x \
-		VERBOSE=1 \
-		dh_auto_test \
-			--no-parallel \
-			--arch \
-			--builddirectory=build-$$x \
-			-- \
-			--timeout-multiplier 3 \
-			; \
-	done
+	dh_auto_test -- --test-custom
+
 override_dh_auto_test-indep:
-	:
+	: # We run tests in each per-architecture build
 
-override_dh_auto_install-arch:
-	set -e; for x in $(PYTHON3); do \
-		PYTHON=/usr/bin/python$$x \
-		dh_auto_install \
-			--arch \
-			--builddirectory=build-$$x \
-			--destdir=debian/tmp \
-			-- \
-			; \
-		mv debian/tmp/usr/libexec/installed-tests/dbus-python/python$$x/test/*.so \
-			debian/tmp/usr/lib/python3/dist-packages/; \
-	done
-	install -d debian/tmp/usr/lib/python3/dist-packages/dbus_python-${DEB_VERSION_UPSTREAM}.egg-info
-	install -m644 dbus_python.egg-info/PKG-INFO debian/tmp/usr/lib/python3/dist-packages/dbus_python-${DEB_VERSION_UPSTREAM}.egg-info/
-	install -m644 dbus_python.egg-info/dependency_links.txt debian/tmp/usr/lib/python3/dist-packages/dbus_python-${DEB_VERSION_UPSTREAM}.egg-info/
-	install -m644 dbus_python.egg-info/top_level.txt debian/tmp/usr/lib/python3/dist-packages/dbus_python-${DEB_VERSION_UPSTREAM}.egg-info/
-	touch debian/tmp/usr/lib/python3/dist-packages/dbus_python-${DEB_VERSION_UPSTREAM}.egg-info/not-zip-safe
-
-# debhelper >= 13.4 makes all of /usr/libexec executable, which is not
-# quite right for installed-tests
-override_dh_fixperms-arch:
-	dh_fixperms -a -Xusr/libexec/installed-tests
-	chmod --recursive --changes a+rX,u+w,og-w debian/python3-dbus-tests/usr/libexec/installed-tests
-
-override_dh_auto_install-indep:
-	dh_auto_install \
-		--indep \
-		--builddirectory=build-indep \
-		--destdir=debian/tmp-indep \
+# Use Meson directly to install things that mesonpy would
+# install into a weird location
+export PYBUILD_AFTER_INSTALL = \
+	meson install \
+		-C {home_dir}/meson-build \
+		--destdir=$(CURDIR)/debian/tmp \
+		--no-rebuild \
+		--tags=devel,doc,tests \
 		$(NULL)
 
-override_dh_install:
-	rm -fr debian/tmp/usr/include
-	rm -fr debian/tmp/usr/lib/pkgconfig
-	rm -fr debian/tmp/usr/share/doc/dbus-python
-	find debian/tmp -name '*.py[co]' -print0 | xargs -0 rm -f
-	find debian/tmp -name '*.la' -print0 | xargs -0 rm -f
-	dh_install
+execute_after_dh_auto_install:
+	rm -frv debian/tmp/usr/doc
+	rm -frv debian/tmp/usr/include/python3*
+	rm -frv debian/tmp/usr/installed-tests
+	rm -frv debian/tmp/usr/lib/python3*/dist-packages/.dbus_python.mesonpy.libs
 
 override_dh_installchangelogs:
 	dh_installchangelogs -XChangeLog
@@ -133,15 +96,11 @@ override_dh_sphinxdoc-indep:
 
 override_dh_auto_clean:
 	dh_auto_clean
-	rm -Rf build-* install-3*
+	rm -Rf build-*
 	find . -name '*.py[co]' -print0 | xargs -0 rm -f
 
 override_dh_missing:
 	dh_missing --fail-missing
 
 override_dh_python3:
-	dh_python3
-	set -e; for x in $(PYTHON3); do \
-		dh_python3 --shebang="/usr/bin/python$$x" \
-			/usr/libexec/installed-tests/dbus-python/python$$x; \
-	done
+	dh_python3 --shebang=/usr/bin/python3

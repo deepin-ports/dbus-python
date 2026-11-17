@@ -1,6 +1,6 @@
 Source: dbus-python
+X-Style: black
 Section: devel
-Priority: optional
 Maintainer: Utopia Maintenance Team <pkg-utopia-maintainers@lists.alioth.debian.org>
 Uploaders:
  Sjoerd Simons <sjoerd@debian.org>,
@@ -8,24 +8,25 @@ Uploaders:
  Simon McVittie <smcv@debian.org>,
  Loic Minier <lool@dooz.org>,
 Build-Depends:
- dbus-daemon,
- debhelper-compat (= 13),
+ debhelper-compat (= 14),
  dh-python,
  dh-sequence-python3,
+ dbus-daemon,
  libdbus-1-dev,
  libglib2.0-dev,
  meson,
  ninja-build,
+ patchelf,
+ pybuild-plugin-pyproject,
  python3-all-dev,
  python3-gi,
- python3-setuptools,
+ python3-mesonpy,
  python3-tap <!nocheck>,
- python3-wheel,
 Build-Depends-Indep:
- python3-sphinx,
- python3-sphinx-rtd-theme,
-Rules-Requires-Root: no
-Standards-Version: 4.7.2
+ dh-sequence-sphinxdoc <!nodoc>,
+ python3-sphinx <!nodoc>,
+ python3-sphinx-rtd-theme <!nodoc>,
+Standards-Version: 4.7.4
 Homepage: https://www.freedesktop.org/wiki/Software/DBusBindings#Python
 Vcs-Git: https://salsa.debian.org/debian/dbus-python.git
 Vcs-Browser: https://salsa.debian.org/debian/dbus-python
@@ -36,7 +37,6 @@ Section: python
 Architecture: all
 Depends:
  libdbus-1-dev,
- ${misc:Depends},
 Description: main loop integration development files for python3-dbus
  D-Bus is a message bus, used for sending messages between applications.
  Conceptually, it fits somewhere in between raw sockets and CORBA in
@@ -49,13 +49,9 @@ Description: main loop integration development files for python3-dbus
  build-depend on python-dbus-dev should also build-depend on python3-dbus.
 
 Package: python-dbus-doc
+Build-Profiles: <!nodoc>
 Section: doc
 Architecture: all
-Built-Using:
- ${sphinxdoc:Built-Using},
-Depends:
- ${misc:Depends},
- ${sphinxdoc:Depends},
 Suggests:
  python3-dbus,
 Multi-Arch: foreign
@@ -66,16 +62,10 @@ Description: Documentation for the D-Bus Python interface
 Package: python3-dbus
 Section: python
 Architecture: any
-Depends:
- ${misc:Depends},
- ${python3:Depends},
- ${shlibs:Depends},
 Recommends:
  python3-gi,
 Suggests:
  python-dbus-doc,
-Provides:
- ${python3:Provides},
 Description: simple interprocess messaging system (Python 3 interface)
  D-Bus is a message bus, used for sending messages between applications.
  Conceptually, it fits somewhere in between raw sockets and CORBA in
@@ -91,12 +81,10 @@ Architecture: any
 Depends:
  dbus-daemon,
  python3-dbus,
- ${misc:Depends},
- ${python3:Depends},
- ${shlibs:Depends},
 Recommends:
  gnome-desktop-testing,
  python3-gi,
+ python3-tap,
 Description: simple interprocess messaging system (Python 3 interface - tests)
  D-Bus is a message bus, used for sending messages between applications.
  .

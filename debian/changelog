@@ -1,8 +1,27 @@
-dbus-python (1.4.0-1deepin1) unstable; urgency=medium
+dbus-python (1.5.0-1) unstable; urgency=medium
 
-  * Rebuild with LTO enabled (dpkg vendor feature optimize/lto).
+  * New upstream release
+    - Works on Python 3.15 (Closes: #1144533)
+  * Build with pybuild and mesonpy
+  * d/control: Use debhelper compat level 14
+    - Remove substvars that are now added automatically
+  * d/control: Remove Rules-Requires-Root: no, default since Debian 13
+  * d/control: Standards-Version: 4.7.4
+    - No longer needs Priority: optional
+  * d/control: python3-dbus-tests Recommends python3-tap (Closes: #1039499)
+  * d/control, d/tests/control: Normalize formatting (debputy reformat)
+  * d/upstream/metadata: Update Gitlab issue tracker URLs
+  * d/watch: Update to v5 format
+  * d/watch: Look for any supported archive extension, not just .tar.gz
+  * d/watch: Also look for PEP-0625 name dbus_python-*.tar.*
+  * Update lintian overrides
+  * Remove files associated with binary packages that are no longer built
+  * d/upstream/signing-key.asc: Update subkeys
+  * d/copyright: Update
+  * d/copyright: Don't quote the FSF's postal address here
+  * d/gbp.conf: Merge upstream VCS tags
 
- -- tunaichao <tunaichao@uniontech.com>  Mon, 21 Sep 2026 14:48:56 +0800
+ -- Simon McVittie <smcv@debian.org>  Sun, 27 Sep 2026 17:58:26 +0100
 
 dbus-python (1.4.0-1) unstable; urgency=medium
 

@@ -1,3 +1,2 @@
-usr/lib/python3/dist-packages/dbus_py_test*.so
-usr/libexec/installed-tests/dbus-python/python3*
-usr/share/installed-tests/dbus-python/python3*
+usr/lib/python3*/dist-packages/dbus/installed-tests
+usr/share/installed-tests/dbus-python

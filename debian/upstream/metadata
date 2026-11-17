@@ -1,5 +1,5 @@
-Bug-Database: https://gitlab.freedesktop.org/dbus/dbus-python/-/issues
-Bug-Submit: https://gitlab.freedesktop.org/dbus/dbus-python/-/issues/new
+Bug-Database: https://gitlab.freedesktop.org/dbus/dbus-python/-/work_items
+Bug-Submit: https://gitlab.freedesktop.org/dbus/dbus-python/-/work_items/new
 Repository: https://gitlab.freedesktop.org/dbus/dbus-python.git
 Repository-Browse: https://gitlab.freedesktop.org/dbus/dbus-python
 Security-Contact: mailto:dbus-security@lists.freedesktop.org

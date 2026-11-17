@@ -1,3 +1,59 @@
+dbus Python Bindings 1.5.0 (2026-09-27)
+=======================================
+
+Dependencies:
+
+* The Meson build system is required.
+  Installation via `pip` and similar PEP-0517 build system frontends
+  requires meson-python (mesonpy) and its dependencies.
+
+* Python 3.7 or later is required.
+
+* Python 3.9 or later is strongly recommended.
+  Older versions are no longer tested or supported.
+
+Build system changes:
+
+* The source release is now built as a sdist using mesonpy,
+  with a name that includes dbus_python, not dbus-python,
+  matching the project's name on PyPI and PEP-0625
+
+* The Autotools build system is no longer available
+
+Enhancements:
+
+* Add a `test_socket_dir` build-time option for systems where /tmp is not
+  available (dbus-python!38, Emily)
+
+* Documentation and "as-installed" tests (if enabled) are associated with
+  `meson install --tags=doc` and `--tags=tests` respectively (Simon McVittie)
+
+Fixes:
+
+* Revert a broken implementation of weak references that caused crashes,
+  especially in Python 3.15
+  (regression in 1.4.0; dbus-python#59, Simon McVittie)
+
+* Avoid repeated configuration reloads during unit testing when dbus was
+  compiled with kqueue (dbus-python#56, Jakub Kulík)
+
+* Add some unit tests for weak references and object destruction
+  (dbus-python#59, Maximiliano Curia)
+
+* Metadata updates (Simon McVittie)
+
+* CI updates (Simon McVittie)
+
+Licensing:
+
+* REUSE metadata is now in TOML format
+
+* After the removal of the Autotools build system,
+  all remaining files outside subprojects/ are believed to be MIT-licensed.
+  The GLib main loop integration in subprojects/dbus-gmain/
+  continues to be under the same "AFL-2.1 OR GPL-2.0-or-later" dual-license
+  as libdbus.
+
 dbus Python Bindings 1.4.0 (2025-03-13)
 =======================================
 
@@ -5,7 +61,7 @@ Build-time configuration changes:
 
 * When building with Meson, the doc and tests options are now features.
   Documentation is still disabled by default: use -Ddoc=enabled to
-  enable it, or -Ddoc=auto to enable it conditionally if the requireds
+  enable it, or -Ddoc=auto to enable it conditionally if the required
   packages are present.
   Tests are enabled by default if their prerequisites are present, but
   may run a subset of tests if some of the prerequisites are missing.

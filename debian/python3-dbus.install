@@ -1,5 +1,5 @@
-usr/lib/python3/dist-packages/_dbus_bindings.*.so
-usr/lib/python3/dist-packages/_dbus_glib_bindings.*.so
-usr/lib/python3/dist-packages/dbus/*.py
-usr/lib/python3/dist-packages/dbus/*/*.py
-usr/lib/python3/dist-packages/dbus_python-*.egg-info
+usr/lib/python*/dist-packages/_dbus_bindings.*.so
+usr/lib/python*/dist-packages/_dbus_glib_bindings.*.so
+usr/lib/python*/dist-packages/dbus/*.py
+usr/lib/python*/dist-packages/dbus/mainloop/*.py
+usr/lib/python*/dist-packages/dbus_python-*.dist-info
